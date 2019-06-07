@@ -2368,7 +2368,7 @@ bool C4Game::InitGame(C4Group &hGroup, C4ScenarioSection *section, bool fLoadSky
 
 	for (C4Def *def = Defs.FirstDef; def; def = def->Next)
 	{
-		def->Script.Call(PSF_InitializeDef, &C4AulParSet(C4VString(section ? section->szName : "main")));
+		def->Script.Call(PSF_InitializeDef, &C4AulParSet(C4VString(section ? section->szName : "")));
 	}
 
 	// Load objects
