@@ -19,13 +19,13 @@
 #pragma once
 
 #include <C4FacetEx.h>
+#include <C4LoaderScreen.h>
 #include <C4MessageBoard.h>
 #include <C4UpperBoard.h>
 #include <C4Video.h>
 #include <C4Shape.h>
 
 class C4Game;
-class C4LoaderScreen;
 extern C4Game Game;
 
 class C4GraphicsSystem
@@ -63,7 +63,7 @@ public:
 	void ClearPointers(C4Object *pObj);
 	void RecalculateViewports();
 	bool Init();
-	bool InitLoaderScreen(const char *szLoaderSpec);
+	bool InitLoaderScreen(const char *loaderSpec = C4LoaderScreen::DefaultSpec);
 	bool SaveScreenshot(bool fSaveAll);
 	bool DoSaveScreenshot(bool fSaveAll, const char *szFilename);
 	bool SetPalette();

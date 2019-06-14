@@ -40,66 +40,47 @@ C4LoaderScreen::~C4LoaderScreen()
 	delete[] szInfo;
 }
 
-bool C4LoaderScreen::Init(const char *szLoaderSpec)
+bool C4LoaderScreen::Init(std::string loaderSpec)
 {
-	// Determine loader specification
-	if (!szLoaderSpec || !szLoaderSpec[0])
-		szLoaderSpec = "Loader*";
-	char szLoaderSpecPng[128 + 1 + 4], szLoaderSpecBmp[128 + 1 + 4];
-	char szLoaderSpecJpg[128 + 1 + 4], szLoaderSpecJpeg[128 + 1 + 5];
-	SCopy(szLoaderSpec, szLoaderSpecPng); DefaultExtension(szLoaderSpecPng, "png");
-	SCopy(szLoaderSpec, szLoaderSpecBmp); DefaultExtension(szLoaderSpecBmp, "bmp");
-	SCopy(szLoaderSpec, szLoaderSpecJpg); DefaultExtension(szLoaderSpecJpg, "jpg");
-	SCopy(szLoaderSpec, szLoaderSpecJpeg); DefaultExtension(szLoaderSpecJpeg, "jpeg");
-	int iLoaders = 0;
-	C4Group *pGroup = nullptr, *pChosenGrp = nullptr;
-	char ChosenFilename[_MAX_PATH + 1];
-	// query groups of equal priority in set
-	while (pGroup = Game.GroupSet.FindGroup(C4GSCnt_Loaders, pGroup, true))
+	loaders.clear();
+
+	C4Group *group = nullptr;
+	while ((group = Game.GroupSet.FindGroup(C4GSCnt_Loaders, group, true)))
 	{
-		iLoaders += SeekLoaderScreens(*pGroup, szLoaderSpecPng, iLoaders, ChosenFilename, &pChosenGrp);
-		iLoaders += SeekLoaderScreens(*pGroup, szLoaderSpecJpeg, iLoaders, ChosenFilename, &pChosenGrp);
-		iLoaders += SeekLoaderScreens(*pGroup, szLoaderSpecJpg, iLoaders, ChosenFilename, &pChosenGrp);
-		// lower the chance for any loader other than png
-		iLoaders *= 2;
-		iLoaders += SeekLoaderScreens(*pGroup, szLoaderSpecBmp, iLoaders, ChosenFilename, &pChosenGrp);
+		SeekLoaderScreens(*group, loaderSpec);
 	}
+
 	// nothing found? seek in main gfx grp
 	C4Group GfxGrp;
-	if (!iLoaders)
+	if (!loaders.size())
 	{
 		// open it
-		GfxGrp.Close();
 		if (!GfxGrp.Open(Config.AtExePath(C4CFN_Graphics)))
 		{
 			LogFatal(FormatString(LoadResStr("IDS_PRC_NOGFXFILE"), C4CFN_Graphics, GfxGrp.GetError()).getData());
 			return false;
 		}
-		// seek for png-loaders
-		iLoaders = SeekLoaderScreens(GfxGrp, szLoaderSpecPng, iLoaders, ChosenFilename, &pChosenGrp);
-		iLoaders += SeekLoaderScreens(GfxGrp, szLoaderSpecJpg, iLoaders, ChosenFilename, &pChosenGrp);
-		iLoaders += SeekLoaderScreens(GfxGrp, szLoaderSpecJpeg, iLoaders, ChosenFilename, &pChosenGrp);
-		iLoaders *= 2;
-		// seek for bmp-loaders
-		iLoaders += SeekLoaderScreens(GfxGrp, szLoaderSpecBmp, iLoaders, ChosenFilename, &pChosenGrp);
+		SeekLoaderScreens(GfxGrp, loaderSpec);
 		// Still nothing found: fall back to general loader spec in main graphics group
-		if (!iLoaders)
+		if (!loaders.size() && loaderSpec != DefaultSpec)
 		{
-			iLoaders = SeekLoaderScreens(GfxGrp, "Loader*.png", 0, ChosenFilename, &pChosenGrp);
-			iLoaders += SeekLoaderScreens(GfxGrp, "Loader*.jpg", iLoaders, ChosenFilename, &pChosenGrp);
-			iLoaders += SeekLoaderScreens(GfxGrp, "Loader*.jpeg", iLoaders, ChosenFilename, &pChosenGrp);
+			SeekLoaderScreens(GfxGrp, DefaultSpec);
 		}
 		// Not even default loaders available? Fail.
-		if (!iLoaders)
+		if (!loaders.size())
 		{
-			LogFatal(FormatString("No loaders found for loader specification: %s/%s/%s/%s", szLoaderSpecPng, szLoaderSpecBmp, szLoaderSpecJpg, szLoaderSpecJpeg).getData());
+			LogFatal(FormatString("No loaders found for loader specification %s", loaderSpec.c_str()).getData());
 			return false;
 		}
 	}
 
 	// load loader
 	fctBackground.GetFace().SetBackground();
-	if (!fctBackground.Load(*pChosenGrp, ChosenFilename, C4FCT_Full, C4FCT_Full, true)) return false;
+	const auto &pair = loaders.at(static_cast<size_t>(SafeRandom(static_cast<int>(loaders.size()))));
+	if (!fctBackground.Load(*pair.second, pair.first.c_str(), C4FCT_Full, C4FCT_Full, true))
+	{
+		return false;
+	}
 
 	// load info
 	delete[] szInfo; szInfo = nullptr;
@@ -117,23 +98,19 @@ bool C4LoaderScreen::Init(const char *szLoaderSpec)
 	return true;
 }
 
-int C4LoaderScreen::SeekLoaderScreens(C4Group &rFromGrp, const char *szWildcard, int iLoaderCount, char *szDstName, C4Group **ppDestGrp)
+void C4LoaderScreen::SeekLoaderScreens(C4Group &group, const std::string &wildcard)
 {
-	bool fFound;
-	int iLocalLoaders = 0;
-	char Filename[_MAX_PATH + 1];
-	for (fFound = rFromGrp.FindEntry(szWildcard, Filename); fFound; fFound = rFromGrp.FindNextEntry(szWildcard, Filename))
+	for (const auto &extension : {".jpeg", ".jpg", ".png", ".bmp"})
 	{
-		// loader found; choose it, if Daniel wants it that way
-		++iLocalLoaders;
-		if (!SafeRandom(++iLoaderCount))
+		std::string pattern(wildcard);
+		pattern.append(extension);
+
+		char filename[_MAX_PATH + 1];
+		for (bool found = group.FindEntry(pattern.c_str(), filename); found; found = group.FindNextEntry(pattern.c_str(), filename))
 		{
-			// copy group and path
-			*ppDestGrp = &rFromGrp;
-			SCopy(Filename, szDstName, _MAX_PATH);
+			loaders.push_back(std::make_pair(filename, &group));
 		}
 	}
-	return iLocalLoaders;
 }
 
 void C4LoaderScreen::Draw(C4Facet &cgo, int iProgress, C4LogBuffer *pLog, int Process)

@@ -346,11 +346,15 @@ void C4GraphicsSystem::ClearFullscreenBackground()
 	--iRedrawBackground;
 }
 
-bool C4GraphicsSystem::InitLoaderScreen(const char *szLoaderSpec)
+bool C4GraphicsSystem::InitLoaderScreen(const char *loaderSpec)
 {
+	if (!SLen(loaderSpec))
+	{
+		loaderSpec = C4LoaderScreen::DefaultSpec;
+	}
 	// create new loader; overwrite current only if successful
 	C4LoaderScreen *pNewLoader = new C4LoaderScreen();
-	if (!pNewLoader->Init(szLoaderSpec)) { delete pNewLoader; return false; }
+	if (!pNewLoader->Init(loaderSpec)) { delete pNewLoader; return false; }
 	delete pLoaderScreen;
 	pLoaderScreen = pNewLoader;
 	// apply user gamma for loader

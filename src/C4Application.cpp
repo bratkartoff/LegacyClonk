@@ -214,7 +214,7 @@ bool C4Application::PreInit()
 	// init loader: default spec
 	if (fDoUseStartupDialog)
 	{
-		if (!Game.GraphicsSystem.InitLoaderScreen(C4CFN_StartupBackgroundMain))
+		if (!Game.GraphicsSystem.InitLoaderScreen())
 		{
 			LogFatal(LoadResStr("IDS_PRC_ERRLOADER")); return false;
 		}

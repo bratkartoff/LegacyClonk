@@ -306,6 +306,10 @@ void C4StartupMainDlg::OnShown()
 		// Set the focus to the start button (we might still not have the focus after the update-check sometimes... :/)
 		SetFocus(pStartButton, false);
 	}
+	else
+	{
+		Game.GraphicsSystem.pLoaderScreen->Init("Loader*");
+	}
 	fFirstShown = false;
 }
 
