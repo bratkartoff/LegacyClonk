@@ -118,7 +118,7 @@ LRESULT APIENTRY FullScreenWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 		const auto width = LOWORD(lParam);
 		const auto height = HIWORD(lParam);
 
-		if (width != 0 && height != 0)
+// 		if (width != 0 && height != 0)
 		{
 			// this might be called from C4Window::Init in which case Application.pWindow is not yet set
 			if (Application.pWindow) ::SetWindowPos(Application.pWindow->hRenderWindow, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOREDRAW | SWP_NOZORDER);

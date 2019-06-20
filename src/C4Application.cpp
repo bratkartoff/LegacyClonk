@@ -480,7 +480,7 @@ bool C4Application::SetResolution(int32_t iNewResX, int32_t iNewResY)
 	iNewResX = static_cast<int32_t>(ceilf(iNewResX / scale));
 	iNewResY = static_cast<int32_t>(ceilf(iNewResY / scale));
 
-	if (iNewResX != Config.Graphics.ResX || iNewResY != Config.Graphics.ResY)
+// 	if (iNewResX != Config.Graphics.ResX || iNewResY != Config.Graphics.ResY)
 	{
 		Config.Graphics.ResX = iNewResX;
 		Config.Graphics.ResY = iNewResY;
