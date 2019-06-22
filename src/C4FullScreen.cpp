@@ -118,6 +118,10 @@ LRESULT APIENTRY FullScreenWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 		const auto width = LOWORD(lParam);
 		const auto height = HIWORD(lParam);
 
+		static bool wasActive = true;
+		const auto oldActive = wasActive;
+		wasActive = (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED);
+
 		if (width != 0 && height != 0)
 		{
 			// this might be called from C4Window::Init in which case Application.pWindow is not yet set
@@ -125,6 +129,9 @@ LRESULT APIENTRY FullScreenWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 			Application.SetResolution(width, height);
 		}
+
+		// otherwise on some configurations the window will stay white after restoring the window
+		if (!oldActive && wasActive && Application.DDraw) Application.DDraw->RestoreDeviceObjects();
 	}
 		break;
 	case WM_ACTIVATEAPP:
