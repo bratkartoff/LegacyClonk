@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2011, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -25,7 +26,7 @@ const unsigned long C4NetDiscoveryAddress = 0xef; // 239.0.0.0
 class C4Network2IODiscover : public C4NetIOSimpleUDP, private C4NetIO::CBClass
 {
 public:
-	C4Network2IODiscover(int16_t iRefServerPort) : iRefServerPort(iRefServerPort), fEnabled(false)
+	C4Network2IODiscover(uint16_t iRefServerPort) : iRefServerPort(iRefServerPort), fEnabled(false)
 	{
 		C4NetIOSimpleUDP::SetCallback(this);
 	}
@@ -42,7 +43,7 @@ public:
 private:
 	sockaddr_in DiscoveryAddr;
 
-	int16_t iRefServerPort;
+	uint16_t iRefServerPort;
 	bool fEnabled;
 };
 

@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2011, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -22,7 +23,7 @@
 struct C4Network2IODiscoverReply
 {
 	char c;
-	int16_t Port;
+	uint16_t Port;
 };
 
 void C4Network2IODiscover::OnPacket(const class C4NetIOPacket &rPacket, C4NetIO *pNetIO)
