@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -43,10 +43,8 @@ bool C4Network2IODiscover::Init(uint16_t iPort)
 	// Set callback
 	C4NetIOSimpleUDP::SetCallback(this);
 	// Build broadcast address
-	DiscoveryAddr.sin_addr.s_addr = C4NetDiscoveryAddress;
-	DiscoveryAddr.sin_port = htons(iPort);
-	DiscoveryAddr.sin_family = AF_INET;
-	std::memset(&DiscoveryAddr.sin_zero, 0, sizeof(DiscoveryAddr.sin_zero));
+	DiscoveryAddr.SetAddress(C4NetDiscoveryAddress);
+	DiscoveryAddr.SetPort(iPort);
 	// Initialize broadcast
 	if (!C4NetIOSimpleUDP::InitBroadcast(&DiscoveryAddr))
 		return false;
@@ -57,7 +55,7 @@ bool C4Network2IODiscover::Init(uint16_t iPort)
 bool C4Network2IODiscover::Announce()
 {
 	// Announce our presence
-	C4Network2IODiscoverReply Reply = { 4, static_cast<int16_t>(htons(iRefServerPort)) };
+	C4Network2IODiscoverReply Reply = { 4, htons(iRefServerPort) };
 	return Send(C4NetIOPacket(&Reply, sizeof(Reply), false, DiscoveryAddr));
 }
 
@@ -73,7 +71,7 @@ void C4Network2IODiscoverClient::OnPacket(const class C4NetIOPacket &rPacket, C4
 		{
 			const C4Network2IODiscoverReply *pReply = reinterpret_cast<const C4Network2IODiscoverReply *>(rPacket.getData());
 			Discovers[iDiscoverCount] = rPacket.getAddr();
-			Discovers[iDiscoverCount].sin_port = pReply->Port;
+			Discovers[iDiscoverCount].SetPort(pReply->Port);
 			iDiscoverCount++;
 		}
 	}
@@ -89,10 +87,8 @@ bool C4Network2IODiscoverClient::Init(uint16_t iPort)
 	// Set callback
 	C4NetIOSimpleUDP::SetCallback(this);
 	// Build broadcast address
-	DiscoveryAddr.sin_addr.s_addr = C4NetDiscoveryAddress;
-	DiscoveryAddr.sin_port = htons(iPort);
-	DiscoveryAddr.sin_family = AF_INET;
-	std::memset(&DiscoveryAddr.sin_zero, 0, sizeof(DiscoveryAddr.sin_zero));
+	DiscoveryAddr.SetAddress(C4NetDiscoveryAddress);
+	DiscoveryAddr.SetPort(iPort);
 	// Initialize broadcast
 	if (!C4NetIOSimpleUDP::InitBroadcast(&DiscoveryAddr))
 		return false;

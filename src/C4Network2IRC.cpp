@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2013-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -234,7 +235,7 @@ size_t C4Network2IRCClient::UnpackPacket(const StdBuf &rInBuf, const C4NetIO::ad
 bool C4Network2IRCClient::OnConn(const C4NetIO::addr_t &AddrPeer, const C4NetIO::addr_t &AddrConnect, const addr_t *pOwnAddr, C4NetIO *pNetIO)
 {
 	// Security checks
-	if (!fConnecting || fConnected || !AddrEqual(AddrConnect, ServerAddr)) return false;
+	if (!fConnecting || fConnected || AddrConnect != ServerAddr) return false;
 	CStdLock Lock(&CSec);
 	// Save connection data
 	fConnected = true;

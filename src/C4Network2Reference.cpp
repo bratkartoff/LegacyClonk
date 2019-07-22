@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -33,11 +33,11 @@ C4Network2Reference::C4Network2Reference()
 
 C4Network2Reference::~C4Network2Reference() {}
 
-void C4Network2Reference::SetSourceIP(in_addr ip)
+void C4Network2Reference::SetSourceAddress(const C4NetIO::EndpointAddress &ip)
 {
-	for (int i = 0; i < iAddrCnt; i++)
-		if (Addrs[i].isIPNull())
-			Addrs[i].SetIP(ip);
+	source = ip;
+	if (iAddrCnt < C4ClientMaxAddr)
+		Addrs[++iAddrCnt].SetAddr(ip);
 }
 
 #ifdef C4ENGINE
@@ -368,12 +368,15 @@ bool C4Network2HTTPClient::Decompress(StdBuf *pData)
 bool C4Network2HTTPClient::OnConn(const C4NetIO::addr_t &AddrPeer, const C4NetIO::addr_t &AddrConnect, const C4NetIO::addr_t *pOwnAddr, C4NetIO *pNetIO)
 {
 	// Make sure we're actually waiting for this connection
-	if (!AddrEqual(AddrConnect, ServerAddr))
+	if (AddrConnect != ServerAddr)
 		return false;
 	// Save pack peer address
 	PeerAddr = AddrPeer;
 	// Send the request
-	Send(C4NetIOPacket(Request, AddrPeer));
+	if (!Send(C4NetIOPacket(Request, AddrPeer)))
+	{
+		Error.Format("Unable to send HTTP request: %s", Error.getData());
+	}
 	Request.Clear();
 	fConnected = true;
 	return true;
@@ -518,10 +521,15 @@ bool C4Network2HTTPClient::SetServer(const char *szServerAddress)
 		RequestPath = "/";
 	}
 	// Resolve address
-	if (!ResolveAddress(Server.getData(), &ServerAddr, GetDefaultPort()))
+	ServerAddr.SetAddress(Server);
+	if (ServerAddr.IsNull())
 	{
 		SetError(FormatString("Could not resolve server address %s!", Server.getData()).getData());
 		return false;
+	}
+	if (ServerAddr.GetPort() == C4NetIO::EndpointAddress::IPPORT_NONE)
+	{
+		ServerAddr.SetPort(GetDefaultPort());
 	}
 	// Remove port
 	const char *pColon = strchr(Server.getData(), ':');
@@ -582,7 +590,7 @@ bool C4Network2RefClient::GetReferences(C4Network2Reference ** &rpReferences, in
 	}
 	// Set source ip
 	for (int i = 0; i < rRefCount; i++)
-		rpReferences[i]->SetSourceIP(getServerAddress().sin_addr);
+		rpReferences[i]->SetSourceAddress(getServerAddress());
 	// validate version
 	if (MasterVersion.iVer[0]) fVerSet = true;
 	// Done

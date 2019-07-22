@@ -177,6 +177,13 @@ if (WIN32)
 endif ()
 target_link_libraries(clonk standard)
 
+add_executable(netpuncher EXCLUDE_FROM_ALL
+	src/C4PuncherHash.h
+	src/netpuncher.cpp
+)
+
+#target_link_libraries(netpuncher clonk) FIXME
+
 # Link libraries
 
 # Link FMOD
@@ -276,7 +283,7 @@ set(HAVE_PTHREAD ${CMAKE_USE_PTHREADS_INIT})
 
 # Link Windows libraries
 if (WIN32)
-	target_link_libraries(clonk winmm ws2_32)
+	target_link_libraries(clonk winmm ws2_32 iphlpapi)
 endif ()
 
 # Link X11

@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -257,7 +257,7 @@ protected:
 public:
 	C4NetIO               *getNetClass()    const { return pNetClass; }
 	C4Network2IOProtocol   getProtocol()    const { return eProt; }
-	const C4NetIO::addr_t &getPeerAddr()    const { return PeerAddr.sin_port ? PeerAddr : ConnectAddr; }
+	const C4NetIO::addr_t &getPeerAddr()    const { return PeerAddr.GetPort() ? PeerAddr : ConnectAddr; }
 	const C4NetIO::addr_t &getConnectAddr() const { return ConnectAddr; }
 	uint32_t               getID()          const { return iID; }
 	time_t                 getTimestamp()   const { return iTimestamp; }

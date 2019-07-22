@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -64,9 +64,11 @@ private:
 	// Network addresses
 	uint8_t iAddrCnt;
 	C4Network2Address Addrs[C4ClientMaxAddr];
+	C4NetIO::EndpointAddress source;
 
 public:
 	const C4Network2Address &getAddr(int i) const { return Addrs[i]; }
+	C4Network2Address &getAddr(int i) { return Addrs[i]; }
 	int getAddrCnt() const { return iAddrCnt; }
 	const char *getTitle() const { return Title.getData(); }
 	int32_t getIcon() const { return Icon; }
@@ -82,7 +84,8 @@ public:
 	C4NetpuncherID_t getNetpuncherGameID() const { return NetpuncherGameID; }
 	StdStrBuf getNetpuncherAddr() const { return NetpuncherAddr; }
 
-	void SetSourceIP(in_addr ip);
+	void SetSourceAddress(const C4NetIO::EndpointAddress &ip);
+	const C4NetIO::EndpointAddress &GetSourceAddress() const { return source; }
 
 	void InitLocal(C4Game *pGame);
 
