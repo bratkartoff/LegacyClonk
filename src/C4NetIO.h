@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -155,6 +156,8 @@ public:
 
 	uint8_t getStatus() const { return getSize() ? *getBufPtr<char>(*this) : 0; }
 	StdBuf  getPBuf()   const { return getSize() ? getPart(1, getSize() - 1) : getRef(); }
+	const char *getPData() const { return getSize() ? getBufPtr<char>(*this, 1) : nullptr; }
+	size_t getPSize() const { return getSize() ? getSize() - 1 : 0; }
 
 	// Some overloads
 	C4NetIOPacket getRef()    const { return C4NetIOPacket(StdBuf::getRef(), addr); }
@@ -443,6 +446,7 @@ public:
 	virtual bool Close(const addr_t &addr);
 
 	virtual bool Send(const C4NetIOPacket &rPacket);
+	bool SendDirect(C4NetIOPacket &&packet); // (mt-safe)
 	virtual bool Broadcast(const C4NetIOPacket &rPacket);
 	virtual bool SetBroadcast(const addr_t &addr, bool fSet = true);
 
@@ -729,7 +733,6 @@ protected:
 
 	// sending
 	bool BroadcastDirect(const Packet &rPacket, unsigned int iNr = ~0u); // (mt-safe)
-	bool SendDirect(C4NetIOPacket &&rPacket); // (mt-safe)
 
 	// multicast related
 	bool DoLoopbackTest();

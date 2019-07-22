@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -19,6 +20,7 @@
 #include "C4NetIO.h"
 #include "C4Client.h"
 #include "C4InteractiveThread.h"
+#include "C4PuncherPacket.h"
 
 #include <atomic>
 
@@ -130,7 +132,9 @@ public:
 	bool BroadcastMsg(const C4NetIOPacket &rPkt); // by both
 
 	// punch
-	bool Punch(C4NetIO::addr_t PuncherAddr); // by main thread
+	bool InitPuncher(C4NetIO::addr_t PuncherAddr); // by main thread
+	void SendPuncherPacket(const C4NetpuncherPacket&);
+	void Punch(const C4NetIO::addr_t&); // sends a ping packet
 
 	// stuff
 	C4NetIO *getNetIO(C4Network2IOProtocol eProt); // by both
@@ -180,6 +184,7 @@ protected:
 	// packet handling (some are really handled here)
 	void HandlePacket(char cStatus, const C4PacketBase *pPacket, C4Network2IOConnection *pConn);
 	void HandleFwdReq(const class C4PacketFwd &rFwd, C4Network2IOConnection *pBy);
+	void HandlePuncherPacket(const C4NetIOPacket &rPacket);
 
 	// misc
 	bool Ping();
@@ -188,7 +193,7 @@ protected:
 	void SendConnPackets();
 
 	// puncher
-	void OnPunch(C4NetIO::addr_t addr);
+	void OnPuncherConnect(C4NetIO::addr_t addr);
 };
 
 enum C4Network2IOConnStatus

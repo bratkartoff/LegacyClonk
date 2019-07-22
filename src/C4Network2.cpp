@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -134,7 +135,8 @@ C4Network2::C4Network2()
 	pVoteDialog(nullptr),
 	fPausedForVote(false),
 	iLastOwnVoting(0),
-	fStreaming(nullptr) {}
+	fStreaming(false),
+	NetpuncherGameID(0){}
 
 bool C4Network2::InitHost(bool fLobby)
 {
@@ -147,6 +149,8 @@ bool C4Network2::InitHost(bool fLobby)
 	fChasing = false;
 	fAllowJoin = false;
 	iNextClientID = C4ClientIDStart;
+	NetpuncherGameID = 0;
+	NetpuncherAddr = Config.Network.PuncherAddress;
 	// initialize client list
 	Clients.Init(&Game.Clients, true);
 	// initialize resource list
@@ -196,6 +200,8 @@ C4Network2::InitResult C4Network2::InitClient(const C4Network2Reference &Ref, bo
 	const C4ClientCore &HostCore = Ref.Parameters.Clients.getHost()->getCore();
 	// repeat if wrong password
 	fWrongPassword = Ref.isPasswordNeeded();
+	NetpuncherGameID = Ref.getNetpuncherGameID();
+	NetpuncherAddr = Ref.getNetpuncherAddr();
 	StdStrBuf Password;
 	for (;;)
 	{
@@ -267,6 +273,8 @@ C4Network2::InitResult C4Network2::InitClient(const class C4Network2Address *pAd
 	pControl = &Game.Control.Network;
 	// set exclusive connection mode
 	NetIO.SetExclusiveConnMode(true);
+	// warm up netpuncher
+	InitPuncher();
 	// try to connect host
 	StdStrBuf strAddresses; int iSuccesses = 0;
 	for (int i = 0; i < iAddrCount; i++)
@@ -654,6 +662,7 @@ void C4Network2::Clear()
 	if (Game.pGUI) delete pVoteDialog; pVoteDialog = nullptr;
 	fPausedForVote = false;
 	iLastOwnVoting = 0;
+	NetpuncherGameID = 0;
 	Votes.Clear();
 	// don't clear fPasswordNeeded here, it's needed by InitClient
 }
@@ -861,6 +870,49 @@ void C4Network2::HandleLobbyPacket(char cStatus, const C4PacketBase *pBasePkt, C
 	if (!pClient) pClient = Clients.GetClientByID(pConn->getClientID());
 	// forward directly to lobby
 	if (pLobby) pLobby->HandlePacket(cStatus, pBasePkt, pClient);
+}
+
+bool C4Network2::HandlePuncherPacket(C4NetpuncherPacket::uptr pkt)
+{
+	// TODO: is this all thread-safe?
+	assert(pkt);
+#define GETPKT(c) dynamic_cast<C4NetpuncherPacket##c*>(pkt.get())
+	switch (pkt->GetType())
+	{
+		case PID_Puncher_CReq:
+			if (isHost())
+			{
+				NetIO.Punch(GETPKT(CReq)->GetAddr());
+				return true;
+			}
+			else
+			{
+				// The IP/Port should be already in the masterserver list, so just keep trying.
+				return Status.getState() == GS_Init;
+			}
+		case PID_Puncher_AssID:
+			if (isHost())
+			{
+				NetpuncherGameID = GETPKT(AssID)->GetID();
+				InvalidateReference();
+			}
+			else
+			{
+				// While we don't need the ID as a client, this nicely serves as the signal that we can start using the netpuncher
+				if (Status.getState() == GS_Init && getNetpuncherGameID())
+					NetIO.SendPuncherPacket(C4NetpuncherPacketSReq(getNetpuncherGameID()));
+			}
+			return true;
+		default: return false;
+	}
+}
+
+void C4Network2::InitPuncher()
+{
+	// We have an internet connection, so let's punch the puncher server here in order to open an udp port
+	C4NetIO::addr_t PuncherAddr;
+	if (ResolveAddress(getNetpuncherAddr().getData(), &PuncherAddr, C4NetStdPortPuncher))
+		NetIO.InitPuncher(PuncherAddr);
 }
 
 void C4Network2::OnGameSynchronized()
@@ -1968,10 +2020,7 @@ bool C4Network2::LeagueStart(bool *pCancel)
 		return false;
 	}
 
-	// We have an internet connection, so let's punch the master server here in order to open an udp port
-	C4NetIO::addr_t PuncherAddr;
-	if (ResolveAddress(Config.Network.PuncherAddress, &PuncherAddr, C4NetStdPortPuncher))
-		NetIO.Punch(PuncherAddr);
+	InitPuncher();
 
 	// Let's wait for response
 	StdStrBuf Message = FormatString(LoadResStr("IDS_NET_LEAGUE_REGGAME"), pLeagueClient->getServerName());

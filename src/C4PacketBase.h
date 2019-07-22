@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -176,6 +177,9 @@ enum C4PacketType
 	CID_ActivateGameGoalRule = CID_First | 0x56,
 	CID_SetPlayerTeam        = CID_First | 0x57,
 	CID_EliminatePlayer      = CID_First | 0x58
+
+	// Note: There are some more packet types in src/C4PuncherPacket.h
+	// They have been picked to be distinct from these for safety, not for necessary.
 };
 
 // packet classes

@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011-2012, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -31,54 +31,6 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #endif
-
-// *** C4Network2Address
-
-void C4Network2Address::CompileFunc(StdCompiler *pComp)
-{
-	// Clear
-	if (pComp->isCompiler())
-	{
-		std::memset(&addr, 0, sizeof(addr));
-		addr.sin_family = AF_INET;
-	}
-
-	// Write protocol
-	StdEnumEntry<C4Network2IOProtocol> Protocols[] =
-	{
-		{ "UDP", P_UDP },
-		{ "TCP", P_TCP },
-
-		{ nullptr,  P_NONE },
-	};
-	pComp->Value(mkEnumAdaptT<uint8_t>(eProtocol, Protocols));
-	pComp->Separator(StdCompiler::SEP_PART2); // ':'
-
-	// Write IP (no IP = 0.0.0.0)
-	in_addr zero; zero.s_addr = INADDR_ANY;
-	pComp->Value(mkDefaultAdapt(addr.sin_addr, zero));
-	pComp->Separator(StdCompiler::SEP_PART2); // ':'
-
-	// Write port
-	uint16_t iPort = htons(addr.sin_port);
-	pComp->Value(iPort);
-	addr.sin_port = htons(iPort);
-}
-
-StdStrBuf C4Network2Address::toString() const
-{
-	switch (eProtocol)
-	{
-	case P_UDP: return FormatString("UDP:%s:%d", inet_ntoa(addr.sin_addr), htons(addr.sin_port));
-	case P_TCP: return FormatString("TCP:%s:%d", inet_ntoa(addr.sin_addr), htons(addr.sin_port));
-	}
-	return StdStrBuf("INVALID");
-}
-
-bool C4Network2Address::operator==(const C4Network2Address &addr2) const
-{
-	return eProtocol == addr2.getProtocol() && AddrEqual(addr, addr2.getAddr());
-}
 
 // *** C4Network2Client
 
@@ -198,6 +150,7 @@ bool C4Network2Client::DoConnectAttempt(C4Network2IO *pIO)
 
 bool C4Network2Client::hasAddr(const C4Network2Address &addr) const
 {
+	// Note that the host only knows its own address as 0.0.0.0, so if the real address is being added, that can't be sorted out.
 	for (int32_t i = 0; i < iAddrCnt; i++)
 		if (Addr[i] == addr)
 			return true;

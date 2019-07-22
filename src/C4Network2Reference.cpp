@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -28,7 +29,7 @@
 C4Network2Reference::C4Network2Reference()
 	: Icon(0), Time(0), Frame(0), StartTime(0), LeaguePerformance(0),
 	JoinAllowed(true), ObservingAllowed(true), PasswordNeeded(false), OfficialServer(false),
-	iAddrCnt(0) {}
+	iAddrCnt(0), NetpuncherGameID(0) {}
 
 C4Network2Reference::~C4Network2Reference() {}
 
@@ -70,6 +71,8 @@ void C4Network2Reference::InitLocal(C4Game *pGame)
 	JoinAllowed = pGame->Network.isJoinAllowed();
 	ObservingAllowed = pGame->Network.isObservingAllowed();
 	PasswordNeeded = pGame->Network.isPassworded();
+	NetpuncherGameID = pGame->Network.getNetpuncherGameID();
+	NetpuncherAddr = pGame->Network.getNetpuncherAddr();
 	Game.Set();
 
 	// Addresses
@@ -103,6 +106,8 @@ void C4Network2Reference::CompileFunc(StdCompiler *pComp)
 	pComp->Value(mkNamingAdapt(mkArrayAdaptDM(Game.iVer, 0),                       "Version"));
 	pComp->Value(mkNamingAdapt(Game.iBuild,                                        "Build",             -1));
 	pComp->Value(mkNamingAdapt(OfficialServer,                                     "OfficialServer",    false));
+	pComp->Value(mkNamingAdapt(NetpuncherGameID,                                   "NetpuncherID",      0, false, false));
+	pComp->Value(mkNamingAdapt(NetpuncherAddr,                                     "NetpuncherAddr",    "", false, false));
 
 	pComp->Value(Parameters);
 }

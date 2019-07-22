@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2016, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -54,6 +55,8 @@ private:
 	bool ObservingAllowed;
 	bool PasswordNeeded;
 	bool OfficialServer;
+	C4NetpuncherID_t NetpuncherGameID;
+	StdCopyStrBuf NetpuncherAddr;
 
 	// Engine information
 	C4GameVersion Game;
@@ -76,6 +79,8 @@ public:
 	int32_t getSortOrder() const;
 	int32_t getTime() const { return Time; }
 	int32_t getStartTime() const { return StartTime; }
+	C4NetpuncherID_t getNetpuncherGameID() const { return NetpuncherGameID; }
+	StdStrBuf getNetpuncherAddr() const { return NetpuncherAddr; }
 
 	void SetSourceIP(in_addr ip);
 
