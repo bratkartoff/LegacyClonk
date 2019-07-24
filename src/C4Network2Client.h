@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -22,6 +22,8 @@
 #include "C4PacketBase.h"
 #include "C4Client.h"
 #include "C4Network2Address.h"
+
+#include <set>
 
 class C4Network2; class C4Network2IOConnection;
 
@@ -59,6 +61,9 @@ protected:
 	int32_t AddrAttempts[C4ClientMaxAddr];
 	int32_t iAddrCnt;
 
+	// interface ids
+	std::set<int> InterfaceIDs;
+
 	// status
 	C4Network2ClientStatus eStatus;
 
@@ -88,6 +93,8 @@ public:
 
 	int32_t                  getAddrCnt()       const { return iAddrCnt; }
 	const C4Network2Address &getAddr(int32_t i) const { return Addr[i]; }
+
+	const std::set<int> &getInterfaceIDs() const { return InterfaceIDs; }
 
 	C4Network2ClientStatus getStatus()   const { return eStatus; }
 	bool                   hasJoinData() const { return getStatus() != NCS_Joining; }

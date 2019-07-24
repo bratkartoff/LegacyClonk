@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2013-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -101,6 +101,7 @@ public:
 		bool IsNull() const;
 		bool IsMulticast() const;
 		bool IsLoopback() const;
+		bool IsLocal() const;
 //		bool IsBroadcast() const;
 
 		StdStrBuf ToString(int flags = 0) const;

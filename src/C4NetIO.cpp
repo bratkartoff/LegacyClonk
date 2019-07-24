@@ -2,6 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
+ * Copyright (c) 2013-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -240,6 +241,16 @@ bool C4NetIO::HostAddress::IsLoopback() const
 		return IN6_IS_ADDR_LOOPBACK(&v6.sin6_addr) != 0;
 	if (gen.sa_family == AF_INET)
 		return (ntohl(v4.sin_addr.s_addr) >> 24) == 127;
+	return false;
+}
+
+bool C4NetIO::HostAddress::IsLocal() const
+{
+	if (gen.sa_family == AF_INET6)
+		return IN6_IS_ADDR_LINKLOCAL(&v6.sin6_addr) != 0;
+	// We don't really care about local 169.256.0.0/16 addresses here as users will either have a
+	// router doing DHCP (which will prevent usage of these addresses) or have a network that
+	// doesn't care about IP and IPv6 link-local addresses will work.
 	return false;
 }
 
