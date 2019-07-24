@@ -22,9 +22,10 @@
 #include <memory>
 
 enum C4NetpuncherPacketType {
-	PID_Puncher_AssID = 0x51, // Puncher announcing ID to client
+	PID_Puncher_AssID = 0x51, // Puncher announcing ID to host
 	PID_Puncher_SReq  = 0x52, // Client requesting to be served with punching (for an ID)
 	PID_Puncher_CReq  = 0x53, // Puncher requesting clients to punch (towards an address)
+	PID_Puncher_IDReq = 0x54, // Host requesting an ID
 	// extend this with exchanging ICE parameters, some day?
 };
 
@@ -38,7 +39,8 @@ struct C4NetpuncherID
 	bool operator==(const C4NetpuncherID& other) const { return v4 == other.v4 && v6 == other.v6; }
 };
 
-class C4NetpuncherPacket {
+class C4NetpuncherPacket
+{
 public:
 	typedef std::unique_ptr<C4NetpuncherPacket> uptr;
 	static std::unique_ptr<C4NetpuncherPacket> Construct(const C4NetIOPacket& rpack);
@@ -50,8 +52,19 @@ protected:
 	typedef C4NetpuncherID::value CID;
 };
 
+class C4NetpuncherPacketIDReq : public C4NetpuncherPacket
+{
+private:
+	StdBuf PackInto() const override { return StdBuf(); }
+public:
+	C4NetpuncherPacketIDReq() = default;
+	C4NetpuncherPacketIDReq(const C4NetIOPacket& rpack) { }
+	C4NetpuncherPacketType GetType() const final { return PID_Puncher_IDReq; }
+};
+
 template<C4NetpuncherPacketType TYPE>
-class C4NetpuncherPacketID : public C4NetpuncherPacket {
+class C4NetpuncherPacketID : public C4NetpuncherPacket
+{
 private: 
 	CID id;
 	StdBuf PackInto() const override; 
@@ -72,7 +85,8 @@ public:
 PIDC(AssID); PIDC(SReq);
 #undef PIDC
 
-class C4NetpuncherPacketCReq : public C4NetpuncherPacket {
+class C4NetpuncherPacketCReq : public C4NetpuncherPacket
+{
 private:
 	C4NetIO::addr_t addr; 
 	StdBuf PackInto() const override;

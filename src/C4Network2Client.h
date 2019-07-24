@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011-2017, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2018, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -60,6 +60,8 @@ protected:
 	C4Network2Address Addr[C4ClientMaxAddr];
 	int32_t AddrAttempts[C4ClientMaxAddr];
 	int32_t iAddrCnt;
+	C4NetIO::addr_t IPv6AddrFromPuncher;
+
 
 	// interface ids
 	std::set<int> InterfaceIDs;
@@ -73,6 +75,7 @@ protected:
 	// connections
 	C4Network2IOConnection *pMsgConn, *pDataConn;
 	time_t iNextConnAttempt;
+	std::unique_ptr<C4NetIOTCP::Socket> TcpSimOpenSocket;
 
 	// part of client list
 	C4Network2Client *pNext;
@@ -124,9 +127,11 @@ public:
 	bool SendMsg(C4NetIOPacket rPkt) const;
 
 	bool DoConnectAttempt(class C4Network2IO *pIO);
+	bool DoTCPSimultaneousOpen(class C4Network2IO *pIO, const C4Network2Address &addr);
 
 	// addresses
 	bool hasAddr(const C4Network2Address &addr) const;
+	void AddAddrFromPuncher(const C4NetIO::addr_t &addr);
 	bool AddAddr(const C4Network2Address &addr, bool fAnnounce);
 	void AddLocalAddrs(int16_t iPortTCP, int16_t iPortUDP);
 
@@ -205,4 +210,23 @@ public:
 	const C4Network2Address &getAddr()     const { return addr; }
 
 	virtual void CompileFunc(StdCompiler *pComp);
+};
+
+class C4PacketTCPSimOpen : public C4PacketBase
+{
+public:
+	C4PacketTCPSimOpen() = default;
+	C4PacketTCPSimOpen(int32_t ClientID, const C4Network2Address &addr)
+		: ClientID(ClientID), addr(addr)
+	{ }
+
+protected:
+	int32_t ClientID;
+	C4Network2Address addr;
+
+public:
+	int32_t getClientID() const { return ClientID; }
+	const C4Network2Address &getAddr() const { return addr; }
+
+	void CompileFunc(StdCompiler *pComp) override;
 };

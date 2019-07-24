@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2016, The OpenClonk Team and contributors
+ * Copyright (c) 2016-2018, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -110,6 +110,9 @@ enum C4PacketType
 
 	// activation request
 	PID_ClientActReq = 0x13,
+
+	// request to perform TCP simultaneous open
+	PID_TCPSimOpen    = 0x14,
 
 	// all data a client needs to get started
 	PID_JoinData = 0x15,
