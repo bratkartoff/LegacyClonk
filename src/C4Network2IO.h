@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2013-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -95,7 +95,8 @@ protected:
 		iUDPIRate, iUDPORate, iUDPBCRate;
 
 	// punching
-	C4NetIO::addr_t PuncherAddr;
+	C4NetIO::addr_t PuncherAddrIPv4, PuncherAddrIPv6;
+	bool IsPuncherAddr(const C4NetIO::addr_t& addr) const;
 
 public:
 	bool hasTCP() const { return !!pNetIO_TCP; }
@@ -133,7 +134,7 @@ public:
 
 	// punch
 	bool InitPuncher(C4NetIO::addr_t PuncherAddr); // by main thread
-	void SendPuncherPacket(const C4NetpuncherPacket&);
+	void SendPuncherPacket(const C4NetpuncherPacket&, C4NetIO::HostAddress::AddressFamily family);
 	void Punch(const C4NetIO::addr_t&); // sends a ping packet
 
 	// stuff

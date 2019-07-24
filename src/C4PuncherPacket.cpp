@@ -1,7 +1,7 @@
 /*
  * LegacyClonk
  *
- * Copyright (c) 2016, The OpenClonk Team and contributors
+ * Copyright (c) 2016-2017, The OpenClonk Team and contributors
  * Copyright (c) 2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -18,6 +18,12 @@
 #include "C4PuncherPacket.h"
 #include "C4Network2Address.h"
 #include <sstream>
+
+void C4NetpuncherID::CompileFunc(StdCompiler *pComp)
+{
+	pComp->Value(mkNamingAdapt(v4, "IPv4", 0u));
+	pComp->Value(mkNamingAdapt(v6, "IPv6", 0u));
+}
 
 std::unique_ptr<C4NetpuncherPacket> C4NetpuncherPacket::Construct(const C4NetIOPacket& rpack)
 {

@@ -55,7 +55,7 @@ private:
 	bool ObservingAllowed;
 	bool PasswordNeeded;
 	bool OfficialServer;
-	C4NetpuncherID_t NetpuncherGameID;
+	C4NetpuncherID NetpuncherGameID;
 	StdCopyStrBuf NetpuncherAddr;
 
 	// Engine information
@@ -81,7 +81,7 @@ public:
 	int32_t getSortOrder() const;
 	int32_t getTime() const { return Time; }
 	int32_t getStartTime() const { return StartTime; }
-	C4NetpuncherID_t getNetpuncherGameID() const { return NetpuncherGameID; }
+	C4NetpuncherID getNetpuncherGameID() const { return NetpuncherGameID; }
 	StdStrBuf getNetpuncherAddr() const { return NetpuncherAddr; }
 
 	void SetSourceAddress(const C4NetIO::EndpointAddress &ip);

@@ -29,7 +29,7 @@
 C4Network2Reference::C4Network2Reference()
 	: Icon(0), Time(0), Frame(0), StartTime(0), LeaguePerformance(0),
 	JoinAllowed(true), ObservingAllowed(true), PasswordNeeded(false), OfficialServer(false),
-	iAddrCnt(0), NetpuncherGameID(0) {}
+	iAddrCnt(0), NetpuncherGameID(C4NetpuncherID()) {}
 
 C4Network2Reference::~C4Network2Reference() {}
 
@@ -106,7 +106,7 @@ void C4Network2Reference::CompileFunc(StdCompiler *pComp)
 	pComp->Value(mkNamingAdapt(mkArrayAdaptDM(Game.iVer, 0),                       "Version"));
 	pComp->Value(mkNamingAdapt(Game.iBuild,                                        "Build",             -1));
 	pComp->Value(mkNamingAdapt(OfficialServer,                                     "OfficialServer",    false));
-	pComp->Value(mkNamingAdapt(NetpuncherGameID,                                   "NetpuncherID",      0, false, false));
+	pComp->Value(mkNamingAdapt(NetpuncherGameID,                                   "NetpuncherID",      C4NetpuncherID(), false, false));
 	pComp->Value(mkNamingAdapt(NetpuncherAddr,                                     "NetpuncherAddr",    "", false, false));
 
 	pComp->Value(Parameters);
