@@ -2307,6 +2307,11 @@ struct C4NetIOUDP::BinAddr
 		return result;
 	}
 
+	StdStrBuf ToString() const
+	{
+		return static_cast<C4NetIO::addr_t>(*this).ToString();
+	}
+
 	uint16_t port;
 	uint8_t type;
 	union
