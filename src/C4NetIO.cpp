@@ -684,6 +684,17 @@ C4NetIO::C4NetIO()
 
 C4NetIO::~C4NetIO() {}
 
+bool C4NetIO::EnableDualStack(SOCKET socket)
+{
+	int opt = 0;
+	if (setsockopt(socket, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&opt), sizeof(opt)) == SOCKET_ERROR)
+	{
+		SetError("could not enable dual-stack socket", true);
+		return false;
+	}
+	return true;
+}
+
 void C4NetIO::SetError(const char *strnError, bool fSockErr)
 {
 	fSockErr &= HaveSocketError();
@@ -1059,6 +1070,11 @@ bool C4NetIOTCP::Connect(const C4NetIO::addr_t &addr) // (mt-safe)
 	if (nsock == INVALID_SOCKET)
 	{
 		SetError("socket creation failed", true);
+		return false;
+	}
+
+	if (!EnableDualStack(lsock))
+	{
 		return false;
 	}
 
@@ -1752,6 +1768,11 @@ bool C4NetIOSimpleUDP::Init(uint16_t inPort)
 		if ((sock = ::socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP)) == INVALID_SOCKET)
 	{
 		SetError("could not create socket", true);
+		return false;
+	}
+
+	if (!EnableDualStack(sock))
+	{
 		return false;
 	}
 
