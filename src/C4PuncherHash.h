@@ -1,7 +1,7 @@
 /*
  * LegacyClonk
  *
- * Copyright (c) 2013-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2017, The OpenClonk Team and contributors
  * Copyright (c) 2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -92,8 +92,10 @@ namespace std
 				auto unpack = make_tuple(v6.sin6_family, v6.sin6_port, v6.sin6_flowinfo, std::string((char*) v6.sin6_addr.s6_addr, 16), v6.sin6_scope_id);
 				return hash<decltype(unpack)>()(unpack);
 			}
-			default:
+			case C4NetIO::HostAddress::UnknownFamily:
+				assert(!"Unexpected address family");
 				return 0;
 			}
 		}
+	};
 }

@@ -932,7 +932,12 @@ C4NetpuncherID::value &C4Network2::getNetpuncherGameID(C4NetIO::HostAddress::Add
 	{
 	case C4NetIO::HostAddress::IPv4: return NetpuncherGameID.v4;
 	case C4NetIO::HostAddress::IPv6: return NetpuncherGameID.v6;
-	default: assert(false);
+	default:
+	{
+		assert(!"Unexpected address family");
+		// We need to return a valid reference to satisfy the compiler, even though the code here is unreachable.
+		return NetpuncherGameID.v4;
+	}
 	}
 }
 

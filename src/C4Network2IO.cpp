@@ -443,7 +443,7 @@ bool C4Network2IO::InitPuncher(C4NetIO::addr_t nPuncherAddr)
 		PuncherAddrIPv6 = nPuncherAddr;
 		break;
 	default:
-		assert(false);
+		assert(!"Unexpected address family");
 	}
 	// let's punch
 	return pNetIO_UDP->Connect(nPuncherAddr);
