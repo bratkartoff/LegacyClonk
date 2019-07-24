@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2013-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -306,11 +306,15 @@ bool C4Network2IRCClient::Connect(const char *szServer, const char *szNick, cons
 	C4NetIOTCP::SetCallback(this);
 	if (!Init())
 		return false;
+
 	// Resolve address
-	if (!ResolveAddress(szServer, &ServerAddr, 6666))
+	ServerAddr.SetAddress(StdStrBuf(szServer));
+	if (ServerAddr.IsNull())
 	{
 		SetError("Could no resolve server address!"); return false;
 	}
+	ServerAddr.SetDefaultPort(6666);
+
 	// Set connection data
 	Nick = szNick; RealName = szRealName;
 	Password = szPassword; AutoJoin = szAutoJoin;
