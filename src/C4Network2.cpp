@@ -1232,11 +1232,6 @@ bool C4Network2::CheckConn(const C4ClientCore &CCore, C4Network2IOConnection *pC
 	{
 		szReply = "wrong client core"; return false;
 	}
-	// check address
-	if (pClient->isConnected() && pClient->getMsgConn()->getPeerAddr() != pConn->getPeerAddr())
-	{
-		szReply = "wrong address"; return false;
-	}
 	// accept
 	return true;
 }
