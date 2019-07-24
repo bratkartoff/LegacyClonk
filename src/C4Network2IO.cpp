@@ -1255,6 +1255,14 @@ void C4Network2IO::OnPuncherConnect(C4NetIO::addr_t addr)
 	if (pLocal)
 	{
 		pLocal->AddAddr(C4Network2Address(maybe_v4, P_UDP), true);
+
+		// If the outside port matches the inside port, there is no port translation and the
+		// TCP address will probably work as well.
+		if (addr.GetPort() == Config.Network.PortUDP && Config.Network.PortTCP > 0)
+		{
+			maybe_v4.SetPort(Config.Network.PortTCP);
+			pLocal->AddAddr(C4Network2Address(maybe_v4, P_TCP), true);
+		}
 	}
 	// Do not Game.Network.InvalidateReference(); yet, we're expecting an ID from the netpuncher
 }
