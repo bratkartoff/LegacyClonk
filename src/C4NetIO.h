@@ -25,6 +25,8 @@
 #include "StdCompiler.h"
 #include "StdScheduler.h"
 
+#include <memory>
+
 #ifdef _WIN32
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
@@ -325,6 +327,18 @@ public:
 	C4NetIOTCP();
 	virtual ~C4NetIOTCP();
 
+	// Socket is an unconnected, but bound socket.
+	class Socket
+	{
+		SOCKET sock;
+		Socket(SOCKET s) : sock(s) { }
+		friend class C4NetIOTCP;
+	public:
+		~Socket();
+		// GetAddress returns the address the socket is bound to.
+		C4NetIO::addr_t GetAddress();
+	};
+
 	// *** interface
 
 	// * not multithreading safe
@@ -336,6 +350,8 @@ public:
 	virtual bool Execute(int iMaxTime = TO_INF);
 
 	// * multithreading safe
+	std::unique_ptr<Socket> Bind(const addr_t &addr);
+	bool Connect(const addr_t &addr, std::unique_ptr<Socket> socket);
 	virtual bool Connect(const addr_t &addr);
 	virtual bool Close(const addr_t &addr);
 
@@ -465,6 +481,9 @@ protected:
 	// *** implementation
 
 	bool Listen(uint16_t inListenPort);
+
+	SOCKET CreateSocket(addr_t::AddressFamily family);
+	bool Connect(const addr_t &addr, SOCKET nsock);
 
 	Peer *Accept(SOCKET nsock = INVALID_SOCKET, const addr_t &ConnectAddr = addr_t());
 	Peer *GetPeer(const addr_t &addr);
