@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -19,6 +19,18 @@
 #include "C4Network2Discover.h"
 
 // *** C4Network2IODiscover
+
+//
+// Quick multicast discovery guide by Luchs:
+//
+// All engines in network mode join a multicast group (defined by C4NetDiscoveryAddress).
+//
+// Engines searching for a game ("client") send a single byte c = 3 to that multicast group. This
+// happens while on the network list on each refresh.
+//
+// Engines hosting a game (when going into the lobby) send a byte c = 4 plus their reference server
+// port to the multicast group. Additionally, they listen for the c = 3 bytes and will reply with
+// another multicast answer.
 
 struct C4Network2IODiscoverReply
 {

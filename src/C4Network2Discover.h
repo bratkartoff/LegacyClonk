@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2011-2016, The OpenClonk Team and contributors
+ * Copyright (c) 2011-2017, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -21,7 +21,7 @@
 
 const int C4NetMaxDiscover = 64;
 
-const C4NetIO::HostAddress C4NetDiscoveryAddress = C4NetIO::HostAddress(0xef000000); // 239.0.0.0
+const C4NetIO::HostAddress C4NetDiscoveryAddress = C4NetIO::HostAddress(StdStrBuf("ff02::1"));
 
 class C4Network2IODiscover : public C4NetIOSimpleUDP, private C4NetIO::CBClass
 {
