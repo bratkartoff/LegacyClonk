@@ -979,9 +979,7 @@ bool C4Network2::HandlePuncherPacket(C4NetpuncherPacket::uptr pkt, C4NetIO::Host
 			}
 			else
 			{
-				// While we don't need the ID as a client, this nicely serves as the signal that we can start using the netpuncher
-				if (Status.getState() == GS_Init && getNetpuncherGameID(family))
-					NetIO.SendPuncherPacket(C4NetpuncherPacketSReq(getNetpuncherGameID(family)), family);
+				// The netpuncher hands out IDs for everyone, but clients have no use for them.
 			}
 			return true;
 		default: return false;
@@ -1020,7 +1018,14 @@ void C4Network2::OnPuncherConnect(C4NetIO::addr_t addr)
 			maybe_v4.SetPort(Config.Network.PortTCP);
 			pLocal->AddAddr(C4Network2Address(maybe_v4, P_TCP), true);
 		}
-		// Do not ::Network.InvalidateReference(); yet, we're expecting an ID from the netpuncher
+		// Do not Game.Network.InvalidateReference(); yet, we're expecting an ID from the netpuncher
+	}
+	// Client connection: request packet from host.
+	if (!isHost())
+	{
+		auto family = maybe_v4.GetFamily();
+		if (Status.getState() == GS_Init && getNetpuncherGameID(family))
+			NetIO.SendPuncherPacket(C4NetpuncherPacketSReq(getNetpuncherGameID(family)), family);
 	}
 }
 
