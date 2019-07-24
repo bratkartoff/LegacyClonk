@@ -54,11 +54,27 @@ private:
 	virtual void OnPacket(const class C4NetIOPacket &rPacket, C4NetIO *pNetIO) {
 		auto& addr = rPacket.getAddr();
 		auto unpack = C4NetpuncherPacket::Construct(rPacket);
-		if (!unpack || unpack->GetType() != PID_Puncher_SReq) { Close(addr); return; }
-		auto other_it = peer_addrs.find(dynamic_cast<C4NetpuncherPacketSReq*>(unpack.get())->GetID());
-		if (other_it == peer_addrs.end()) return; // Might be nice to return some kind of error, for purposes of debugging.
-		Send(C4NetpuncherPacketCReq(other_it->second).PackTo(addr));
-		Send(C4NetpuncherPacketCReq(addr).PackTo(other_it->second));
+		if (!unpack) { Close(addr); return; }
+		switch (unpack->GetType())
+		{
+		case PID_Puncher_IDReq: {
+			auto it = peer_ids.find(addr);
+			if (it != peer_ids.end()) {
+				Send(C4NetpuncherPacketAssID(it->second).PackTo(addr));
+				printf("Host: #%u\n", it->second);
+			}
+			break;
+		}
+		case PID_Puncher_SReq: {
+			auto other_it = peer_addrs.find(dynamic_cast<C4NetpuncherPacketSReq*>(unpack.get())->GetID());
+			if (other_it == peer_addrs.end()) return; // Might be nice to return some kind of error, for purposes of debugging.
+			Send(C4NetpuncherPacketCReq(other_it->second).PackTo(addr));
+			Send(C4NetpuncherPacketCReq(addr).PackTo(other_it->second));
+			break;
+		}
+		default:
+			Close(addr);
+		}
 	}
 	virtual void OnDisconn(const addr_t &AddrPeer, C4NetIO *pNetIO, const char *szReason) {
 		auto it = peer_ids.find(AddrPeer);
