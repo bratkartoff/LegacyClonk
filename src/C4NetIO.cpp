@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2013-2017, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2018, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -531,6 +531,11 @@ C4NetIO::HostAddress::AddressFamily C4NetIO::HostAddress::GetFamily() const
 {
 	return gen.sa_family == AF_INET ? IPv4 :
 		gen.sa_family == AF_INET6 ? IPv6 : UnknownFamily;
+}
+
+size_t C4NetIO::HostAddress::GetAddrLen() const
+{
+	return GetFamily() == IPv4 ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 }
 
 void C4NetIO::EndpointAddress::SetPort(uint16_t port)
@@ -1169,7 +1174,7 @@ bool C4NetIOTCP::Connect(const C4NetIO::addr_t &addr) // (mt-safe)
 #endif
 
 	// connect (async)
-	if (::connect(nsock, &addr, sizeof addr) == SOCKET_ERROR)
+	if (::connect(nsock, &addr, addr.GetAddrLen()) == SOCKET_ERROR)
 	{
 		if (!HaveWouldBlockError()) // expected
 		{
@@ -1350,7 +1355,7 @@ C4NetIOTCP::Peer *C4NetIOTCP::Accept(SOCKET nsock, const addr_t &ConnectAddr) //
 	addr_t caddr = ConnectAddr;
 
 	// accept incoming connection?
-	C4NetIO::addr_t addr; socklen_t iAddrSize = sizeof(addr);
+	C4NetIO::addr_t addr; socklen_t iAddrSize = addr.GetAddrLen();
 	if (nsock == INVALID_SOCKET)
 	{
 		// accept from listener
@@ -1474,7 +1479,7 @@ bool C4NetIOTCP::Listen(uint16_t inListenPort)
 	// bind listen socket
 	addr_t addr = addr_t::Any;
 	addr.SetPort(inListenPort);
-	if (::bind(lsock, &addr, sizeof(addr)) == SOCKET_ERROR)
+	if (::bind(lsock, &addr, addr.GetAddrLen()) == SOCKET_ERROR)
 	{
 		SetError("socket bind failed", true);
 		closesocket(lsock); lsock = INVALID_SOCKET;
@@ -2092,7 +2097,7 @@ bool C4NetIOSimpleUDP::Send(const C4NetIOPacket &rPacket)
 	// send it
 	C4NetIO::addr_t addr = rPacket.getAddr();
 	if (::sendto(sock, getBufPtr<char>(rPacket), rPacket.getSize(), 0,
-		&addr, sizeof(addr))
+		&addr, addr.GetAddrLen())
 		!= int(rPacket.getSize()) &&
 		!HaveWouldBlockError())
 	{

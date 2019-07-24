@@ -2,7 +2,7 @@
  * LegacyClonk
  *
  * Copyright (c) RedWolf Design
- * Copyright (c) 2013-2017, The OpenClonk Team and contributors
+ * Copyright (c) 2013-2018, The OpenClonk Team and contributors
  * Copyright (c) 2017-2019, The LegacyClonk Team and contributors
  *
  * Distributed under the terms of the ISC license; see accompanying file
@@ -85,6 +85,7 @@ public:
 		HostAddress(const sockaddr *addr) { SetHost(addr); }
 
 		AddressFamily GetFamily() const;
+		size_t GetAddrLen() const;
 
 		void SetScopeId(int scopeId);
 		int GetScopeId() const;
