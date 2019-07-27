@@ -11,7 +11,7 @@
 # To redistribute this file separately, substitute the full license texts
 # for the above references.
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.9)
 
 if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 6.1 CACHE TYPE INTERNAL FORCE) # Windows 7
@@ -21,6 +21,8 @@ project("LegacyClonk")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(CheckCXXSymbolExists)
 include(CheckIncludeFileCXX)
